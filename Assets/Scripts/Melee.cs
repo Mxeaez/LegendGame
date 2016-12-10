@@ -7,8 +7,6 @@ public class Melee : NetworkBehaviour
 {
 
     public int m_Damage;
-    //public int m_Armour;
-    //public int m_MovementSpeed;
     public int m_AttackSpeed;
 
     [SyncVar(hook = "OnWalkChange")]
@@ -22,6 +20,8 @@ public class Melee : NetworkBehaviour
 
     public GameObject m_Enemy;
 
+    private Stats m_Stats;
+
     void Awake()
     {
         m_Direction = GetComponent<SyncDirection>();
@@ -30,6 +30,7 @@ public class Melee : NetworkBehaviour
     void Start()
     {
         m_Anim = GetComponent<Animator>();
+        m_Stats = GetComponent<Stats>();
 
         if (transform.transform.localScale.x < 0)
         {
@@ -42,7 +43,7 @@ public class Melee : NetworkBehaviour
         m_Direction.Flip(m_Direction.m_FacingRight);
         if (m_IsWalking)
         {
-            transform.position += new Vector3(transform.localScale.x, 0) * Time.deltaTime;
+            transform.position += new Vector3(transform.localScale.x, 0) * (m_Stats.m_SpeedUpgrade + 2 * .5f) * Time.deltaTime;
         }
     }
 

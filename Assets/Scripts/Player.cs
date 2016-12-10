@@ -6,6 +6,27 @@ using System.Collections;
 
 public class Player : NetworkBehaviour
 {
+    [System.Serializable]
+    public struct Upgrades
+    {
+        [SyncVar]
+        public int workerGold;
+        [SyncVar]
+        public int workerSpeed;
+        [SyncVar]
+        public int meleeArmour;
+        [SyncVar]
+        public int meleeSpeed;
+        [SyncVar]
+        public int rangedArmour;
+        [SyncVar]
+        public int rangedSpeed;
+        [SyncVar]
+        public int airArmour;
+        [SyncVar]
+        public int airSpeed;
+    }
+
     //Player base stats
     [SyncVar]
     public int m_Gold;
@@ -34,14 +55,19 @@ public class Player : NetworkBehaviour
     public GameObject m_WorkerSpawn;
     public GameObject m_UnitSpawn;
 
+    public Upgrades m_Upgrades;
+
     //Variable to sync the direction of the base
     SyncDirection m_Direction;
 
     void Awake()
     {
         m_Direction = GetComponent<SyncDirection>();
-        m_NotEnoughGold = GameObject.Find("Game_HUD/Panel/NotEnoughGold").GetComponent<Text>();
-        m_Anim = GameObject.Find("Game_HUD").transform.FindChild("Panel").GetComponent<Animator>();
+        m_NotEnoughGold = GameObject.Find("Game_HUD/Unit/NotEnoughGold").GetComponent<Text>();
+        m_Anim = GameObject.Find("Game_HUD").transform.FindChild("Unit").GetComponent<Animator>();
+
+        m_Upgrades.meleeSpeed = 0;
+        m_Upgrades.meleeArmour = 0;
     }
 
     void Start()
@@ -63,7 +89,12 @@ public class Player : NetworkBehaviour
             {
                 //Camera.main.gameObject.transform.position = new Vector3(GameObject.Find("SpawnLocationP2").gameObject.transform.position.x, GameObject.Find("SpawnLocationP2").gameObject.transform.position.y, transform.position.z);
                 m_Direction.m_FacingRight = false;
+                Camera.main.GetComponent<MoveCamera>().setMaxRight();
             }
+        }
+        else
+        {
+            Camera.main.GetComponent<MoveCamera>().setMaxLeft();
         }
     }
 
@@ -116,6 +147,9 @@ public class Player : NetworkBehaviour
     {
         GameObject worker = Instantiate(m_Worker, m_WorkerSpawn.transform.position, m_Worker.transform.rotation) as GameObject;
 
+        worker.GetComponent<Stats>().m_GoldUpgrade = m_Upgrades.workerGold;
+        worker.GetComponent<Stats>().m_SpeedUpgrade = m_Upgrades.workerSpeed;
+
         NetworkServer.SpawnWithClientAuthority(worker, this.gameObject);
 
         m_Gold -= Prices.m_WorkerPrice;
@@ -140,6 +174,9 @@ public class Player : NetworkBehaviour
                     melee.transform.localScale = originalScale;
                 }
 
+                melee.GetComponent<Stats>().m_ArmourUpgrade = m_Upgrades.meleeArmour;
+                melee.GetComponent<Stats>().m_SpeedUpgrade = m_Upgrades.meleeSpeed;
+
                 NetworkServer.SpawnWithClientAuthority(melee, this.gameObject);
 
                 m_Gold -= Prices.m_MeleePrice;
@@ -149,6 +186,91 @@ public class Player : NetworkBehaviour
                 Debug.Log("Must wait to spawn");
             }
         }
+    }
+
+    [Command]
+    public void CmdSpawnRanged()
+    {
+        RaycastHit2D raycast = Physics2D.Raycast(m_UnitSpawn.transform.position, new Vector2(0, -1));
+
+        if (raycast.collider != null)
+        {
+            if (raycast.collider.gameObject.CompareTag("Ground"))
+            {
+                GameObject ranged = Instantiate(m_Ranged, new Vector3(raycast.point.x, raycast.point.y + m_Ranged.GetComponent<SpriteRenderer>().bounds.size.y / 2), m_Melee.transform.rotation) as GameObject;
+
+                if (!m_Direction.m_FacingRight)
+                {
+                    Vector3 originalScale = ranged.transform.localScale;
+                    originalScale.x *= -1;
+                    ranged.transform.localScale = originalScale;
+                }
+
+                NetworkServer.SpawnWithClientAuthority(ranged, this.gameObject);
+
+                m_Gold -= Prices.m_RangedPrice;
+            }
+            else
+            {
+                Debug.Log("Must wait to spawn");
+            }
+        }
+    }
+
+
+    ////////
+    ///Upgrades
+    ////////
+
+    [Command]
+    public void CmdUpgradeWorkerGold()
+    {
+         m_Upgrades.workerGold++;
+    }
+
+    [Command]
+    public void CmdUpgradeWorkerSpeed()
+    {
+
+            m_Upgrades.workerSpeed++;
+
+    }
+
+    [Command]
+    public void CmdUpgradeMeleeArmour()
+    {
+
+            m_Upgrades.meleeArmour++;
+    }
+
+    [Command]
+    public void CmdUpgradeMeleeSpeed()
+    {
+            m_Upgrades.meleeSpeed++;
+    }
+
+    [Command]
+    public void CmdUpgradeRangedArmour()
+    {
+            m_Upgrades.rangedArmour++;
+    }
+
+    [Command]
+    public void CmdUpgradeRangedSpeed()
+    {
+            m_Upgrades.rangedSpeed++;
+    }
+
+    [Command]
+    public void CmdUpgradeAirArmour()
+    {
+            m_Upgrades.airArmour++;
+    }
+
+    [Command]
+    public void CmdUpgradeAirSpeed()
+    {
+            m_Upgrades.airSpeed++;
     }
 
 
