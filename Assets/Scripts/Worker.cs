@@ -11,6 +11,8 @@ public class Worker : NetworkBehaviour
 
     private SyncDirection m_Direction;
 
+    public Player m_Player;
+
     void Awake()
     {
         m_Stats = GetComponent<Stats>();
@@ -28,7 +30,14 @@ public class Worker : NetworkBehaviour
     public void FixedUpdate()
     {
         m_Direction.Flip(m_Direction.m_FacingRight);
-        transform.position += new Vector3(transform.localScale.x, 0) * (m_Stats.m_SpeedUpgrade + 1) * Time.deltaTime;
+        if (m_Player != null)
+        {
+            transform.position += new Vector3(transform.localScale.x, 0) * (float)(1.2 + (m_Player.m_WorkerSpeed / 5f)) * Time.deltaTime;
+        }
+        else
+        {
+            transform.position += new Vector3(transform.localScale.x, 0) * Time.deltaTime;
+        }
     }
 
 
@@ -40,8 +49,8 @@ public class Worker : NetworkBehaviour
 
             if(collision.gameObject.GetComponent<Player>() != null)
             {
-                Player player = collision.gameObject.GetComponent<Player>();
-                player.m_Gold += m_GoldMined + player.m_Upgrades.workerGold;
+                m_Player = collision.gameObject.GetComponent<Player>();
+                m_Player.m_Gold += m_GoldMined + m_Player.m_WorkerGold;
             }
         }
     }

@@ -29,11 +29,31 @@ public class Health : NetworkBehaviour {
 
         if (m_CurrentHealth <= 0)
         {
+            RpcWinLoss(transform.gameObject);
             Destroy(gameObject);
             return true;
         }
 
         return false;
+    }
+
+    [ClientRpc]
+    void RpcWinLoss(GameObject thePlayer)
+    {
+        if (thePlayer.GetComponent<Player>() != null)
+        {
+            Time.timeScale = 0;
+            GameObject.Find("WinLossText").GetComponent<Text>().enabled = true;
+            Player losingPlayer = gameObject.GetComponent<Player>();
+            if (!losingPlayer.isLocalPlayer)
+            {
+                GameObject.Find("WinLossText").GetComponent<Text>().text = "You Lose!";
+            }
+            else
+            {
+                GameObject.Find("WinLossText").GetComponent<Text>().text = "You Win!";
+            }
+        }
     }
 
     void OnDamaged(float health)

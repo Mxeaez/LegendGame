@@ -12,7 +12,7 @@ public class SyncDirection : NetworkBehaviour {
         m_FacingRight = Direction;
         if (m_FacingRight)
         {
-            if(gameObject.CompareTag("Melee") || gameObject.CompareTag("Worker"))
+            if(gameObject.CompareTag("Melee") || gameObject.CompareTag("Worker") || gameObject.CompareTag("Ranged") || gameObject.CompareTag("Air"))
             {
                 Vector3 originalScale = transform.localScale;
                 originalScale.x = 1;
@@ -27,7 +27,7 @@ public class SyncDirection : NetworkBehaviour {
         }
         else
         {
-            if (gameObject.CompareTag("Melee") || gameObject.CompareTag("Worker"))
+            if (gameObject.CompareTag("Melee") || gameObject.CompareTag("Worker") || gameObject.CompareTag("Ranged") || gameObject.CompareTag("Air"))
             {
                 Vector3 originalScale = transform.localScale;
                 originalScale.x = -1;

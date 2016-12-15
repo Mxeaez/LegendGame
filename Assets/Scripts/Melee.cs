@@ -3,7 +3,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Collections;
 
-public class Melee : NetworkBehaviour
+public class Melee : Unit
 {
 
     public int m_Damage;
@@ -18,9 +18,11 @@ public class Melee : NetworkBehaviour
 
     private SyncDirection m_Direction;
 
-    public GameObject m_Enemy;
+    //public GameObject m_Enemy;
 
     private Stats m_Stats;
+
+    private Rigidbody2D m_Rigidbody;
 
     void Awake()
     {
@@ -31,19 +33,29 @@ public class Melee : NetworkBehaviour
     {
         m_Anim = GetComponent<Animator>();
         m_Stats = GetComponent<Stats>();
+        m_Rigidbody = GetComponent<Rigidbody2D>();
 
         if (transform.transform.localScale.x < 0)
         {
             m_Direction.m_FacingRight = false;
         }
+        Invoke("EnableCanCheckAuthority", .1f);
     }
 
     public void FixedUpdate()
     {
         m_Direction.Flip(m_Direction.m_FacingRight);
-        if (m_IsWalking)
+        if (!m_IsColliding)
         {
-            transform.position += new Vector3(transform.localScale.x, 0) * (m_Stats.m_SpeedUpgrade + 2 * .5f) * Time.deltaTime;
+            //transform.position += new Vector3(transform.localScale.x, 0) * (m_Stats.m_SpeedUpgrade + 2 * .5f) * Time.deltaTime;
+            if (m_Direction.m_FacingRight)
+            {
+                    m_Rigidbody.velocity = (new Vector3(transform.position.x + 1, transform.position.y) - transform.position).normalized * (float)(1.2 + (m_Stats.m_SpeedUpgrade / 5f));
+            }
+            else
+            {
+                    m_Rigidbody.velocity = (new Vector3(transform.position.x - 1, transform.position.y) - transform.position).normalized * (float)(1.2 + (m_Stats.m_SpeedUpgrade / 5f));
+            }
         }
     }
 
@@ -66,38 +78,36 @@ public class Melee : NetworkBehaviour
         }
     }
 
-    public void OnTriggerEnter2D(Collider2D collision)
+    public void OnCollisionEnter2D(Collision2D collision)
     {
         if (!hasAuthority)
         {
             return;
         }
 
-        if (collision.GetComponent<Health>() != null)
+        if (collision.gameObject.GetComponent<Health>() != null)
         {
-            Health collisionHealth = collision.GetComponent<Health>();
+            Health collisionHealth = collision.gameObject.GetComponent<Health>();
 
             if (!collisionHealth.hasAuthority)
             {
                 Attack(collision.gameObject);
             }
-            else
-            {
-                /*if (!collision.gameObject.CompareTag("Player"))
-                {
-                    CmdSetWalking(false);
-                }*/
-            }
         }
     }
 
-    public void OnTriggerExit2D(Collider2D collision)
+    /*public void OnCollisionExit2D(Collision2D collision)
     {
-        if (hasAuthority)
+        if (collision.gameObject.GetComponent<Health>() != null)
         {
-            CmdSetWalking(true);
+            Health collisionHealth = collision.gameObject.GetComponent<Health>();
+
+            if (!collisionHealth.hasAuthority)
+            {
+                CmdSetWalking(true);
+            }
         }
-    }
+    }*/
 
     private void Attack(GameObject enemy)
     {
@@ -124,10 +134,18 @@ public class Melee : NetworkBehaviour
     {
         float multiplier = Random.Range(0.5f, 1.5f);
 
-        //Returns true if this was the finishing blow
-        if(enemy.GetComponent<Health>().damage(m_Damage * multiplier))
+        if (enemy.GetComponent<Stats>() == null)
         {
-            CmdSetWalking(true);
+            //Returns true if this was the finishing blow to base
+            enemy.GetComponent<Health>().damage(m_Damage * multiplier);
+        }
+        else
+        {
+            if (enemy.GetComponent<Health>().damage(m_Damage * multiplier - enemy.GetComponent<Stats>().m_ArmourUpgrade))
+            {
+                CmdSetWalking(true);
+            }
+
         }
     }
 
@@ -151,6 +169,12 @@ public class Melee : NetworkBehaviour
         }
     }
 
+    [Command]
+    private void CmdSetIsColliding(bool isColliding)
+    {
+        m_IsColliding = isColliding;
+    }
+
     void OnWalkChange(bool walking)
     {
         m_IsWalking = walking;
@@ -169,6 +193,11 @@ public class Melee : NetworkBehaviour
         {
             m_Anim.SetBool(m_CurrentAnimation, true);
         }
+    }
+
+    void OnCollidingChange(bool colliding)
+    {
+        m_IsColliding = colliding;
     }
 
     /*

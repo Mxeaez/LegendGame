@@ -6,26 +6,6 @@ using System.Collections;
 
 public class Player : NetworkBehaviour
 {
-    [System.Serializable]
-    public struct Upgrades
-    {
-        [SyncVar]
-        public int workerGold;
-        [SyncVar]
-        public int workerSpeed;
-        [SyncVar]
-        public int meleeArmour;
-        [SyncVar]
-        public int meleeSpeed;
-        [SyncVar]
-        public int rangedArmour;
-        [SyncVar]
-        public int rangedSpeed;
-        [SyncVar]
-        public int airArmour;
-        [SyncVar]
-        public int airSpeed;
-    }
 
     //Player base stats
     [SyncVar]
@@ -48,6 +28,9 @@ public class Player : NetworkBehaviour
     //Unit Animations
     private Animator m_Anim;
 
+    //UnitUpgrade Animations
+    private Animator m_UpgradeAnim;
+
     //Not enough gold text
     private Text m_NotEnoughGold;
 
@@ -55,7 +38,23 @@ public class Player : NetworkBehaviour
     public GameObject m_WorkerSpawn;
     public GameObject m_UnitSpawn;
 
-    public Upgrades m_Upgrades;
+    //Upgrades
+    [SyncVar]
+    public int m_WorkerGold;
+    [SyncVar]
+    public int m_WorkerSpeed;
+    [SyncVar]
+    public int m_MeleeArmour;
+    [SyncVar]
+    public int m_MeleeSpeed;
+    [SyncVar]
+    public int m_RangedArmour;
+    [SyncVar]
+    public int m_RangedSpeed;
+    [SyncVar]
+    public int m_AirArmour;
+    [SyncVar]
+    public int m_AirSpeed;
 
     //Variable to sync the direction of the base
     SyncDirection m_Direction;
@@ -65,9 +64,10 @@ public class Player : NetworkBehaviour
         m_Direction = GetComponent<SyncDirection>();
         m_NotEnoughGold = GameObject.Find("Game_HUD/Unit/NotEnoughGold").GetComponent<Text>();
         m_Anim = GameObject.Find("Game_HUD").transform.FindChild("Unit").GetComponent<Animator>();
+        m_UpgradeAnim = GameObject.Find("Game_HUD").transform.FindChild("UnitUpgrade").GetComponent<Animator>();
 
-        m_Upgrades.meleeSpeed = 0;
-        m_Upgrades.meleeArmour = 0;
+        m_MeleeSpeed = 0;
+        m_MeleeArmour = 0;
     }
 
     void Start()
@@ -91,11 +91,13 @@ public class Player : NetworkBehaviour
                 m_Direction.m_FacingRight = false;
                 Camera.main.GetComponent<MoveCamera>().setMaxRight();
             }
+            else
+            {
+                Camera.main.GetComponent<MoveCamera>().setMaxLeft();
+            }
         }
-        else
-        {
-            Camera.main.GetComponent<MoveCamera>().setMaxLeft();
-        }
+
+        StartCoroutine(SpawnWorkersAfterDelay());
     }
 
     void Update()
@@ -118,6 +120,7 @@ public class Player : NetworkBehaviour
         else
         {
             m_Anim.SetBool("isClicked", true);
+            m_UpgradeAnim.SetBool("isClicked", false);
         }
     }
 
@@ -137,18 +140,27 @@ public class Player : NetworkBehaviour
     IEnumerator SpawnWorkersAfterDelay()
     {
         yield return new WaitForSeconds(1);
-        CmdSpawnWorker();
-        CmdSpawnWorker();
-        CmdSpawnWorker();
+        CmdSpawnStartingWorker();
+        yield return new WaitForSeconds(1);
+        CmdSpawnStartingWorker();
+        yield return new WaitForSeconds(1);
+        CmdSpawnStartingWorker();
+    }
+
+    [Command]
+    public void CmdSpawnStartingWorker()
+    {
+        GameObject worker = Instantiate(m_Worker, m_WorkerSpawn.transform.position, m_Worker.transform.rotation) as GameObject;
+
+        NetworkServer.SpawnWithClientAuthority(worker, this.gameObject);
+
+        ++m_WorkerCount;
     }
 
     [Command]
     public void CmdSpawnWorker()
     {
         GameObject worker = Instantiate(m_Worker, m_WorkerSpawn.transform.position, m_Worker.transform.rotation) as GameObject;
-
-        worker.GetComponent<Stats>().m_GoldUpgrade = m_Upgrades.workerGold;
-        worker.GetComponent<Stats>().m_SpeedUpgrade = m_Upgrades.workerSpeed;
 
         NetworkServer.SpawnWithClientAuthority(worker, this.gameObject);
 
@@ -174,8 +186,8 @@ public class Player : NetworkBehaviour
                     melee.transform.localScale = originalScale;
                 }
 
-                melee.GetComponent<Stats>().m_ArmourUpgrade = m_Upgrades.meleeArmour;
-                melee.GetComponent<Stats>().m_SpeedUpgrade = m_Upgrades.meleeSpeed;
+                melee.GetComponent<Stats>().m_ArmourUpgrade = m_MeleeArmour;
+                melee.GetComponent<Stats>().m_SpeedUpgrade = m_MeleeSpeed;
 
                 NetworkServer.SpawnWithClientAuthority(melee, this.gameObject);
 
@@ -197,7 +209,7 @@ public class Player : NetworkBehaviour
         {
             if (raycast.collider.gameObject.CompareTag("Ground"))
             {
-                GameObject ranged = Instantiate(m_Ranged, new Vector3(raycast.point.x, raycast.point.y + m_Ranged.GetComponent<SpriteRenderer>().bounds.size.y / 2), m_Melee.transform.rotation) as GameObject;
+                GameObject ranged = Instantiate(m_Ranged, new Vector3(raycast.point.x, raycast.point.y + m_Ranged.GetComponent<SpriteRenderer>().bounds.size.y / 2), m_Ranged.transform.rotation) as GameObject;
 
                 if (!m_Direction.m_FacingRight)
                 {
@@ -225,14 +237,14 @@ public class Player : NetworkBehaviour
     [Command]
     public void CmdUpgradeWorkerGold()
     {
-         m_Upgrades.workerGold++;
+        m_WorkerGold++;
     }
 
     [Command]
     public void CmdUpgradeWorkerSpeed()
     {
 
-            m_Upgrades.workerSpeed++;
+        m_WorkerSpeed++;
 
     }
 
@@ -240,37 +252,37 @@ public class Player : NetworkBehaviour
     public void CmdUpgradeMeleeArmour()
     {
 
-            m_Upgrades.meleeArmour++;
+        m_MeleeArmour++;
     }
 
     [Command]
     public void CmdUpgradeMeleeSpeed()
     {
-            m_Upgrades.meleeSpeed++;
+        m_MeleeSpeed++;
     }
 
     [Command]
     public void CmdUpgradeRangedArmour()
     {
-            m_Upgrades.rangedArmour++;
+        m_RangedArmour++;
     }
 
     [Command]
     public void CmdUpgradeRangedSpeed()
     {
-            m_Upgrades.rangedSpeed++;
+        m_RangedSpeed++;
     }
 
     [Command]
     public void CmdUpgradeAirArmour()
     {
-            m_Upgrades.airArmour++;
+        m_AirArmour++;
     }
 
     [Command]
     public void CmdUpgradeAirSpeed()
     {
-            m_Upgrades.airSpeed++;
+        m_AirSpeed++;
     }
 
 

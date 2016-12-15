@@ -6,8 +6,11 @@ public class Camp : MonoBehaviour {
 
     private Player m_Player;
 
-    //Unit Animations
+    //UnitUpgrade Animations
     private Animator m_Anim;
+
+    //Unit Animations
+    private Animator m_UnitAnim;
 
     private Text m_NotEnoughGold;
 
@@ -15,6 +18,7 @@ public class Camp : MonoBehaviour {
     void Start () {
         m_Player = transform.parent.GetComponent<Player>();
         m_Anim = GameObject.Find("Game_HUD").transform.FindChild("UnitUpgrade").GetComponent<Animator>();
+        m_UnitAnim = GameObject.Find("Game_HUD").transform.FindChild("Unit").GetComponent<Animator>();
     }
 	
 	// Update is called once per frame
@@ -36,6 +40,7 @@ public class Camp : MonoBehaviour {
         else
         {
             m_Anim.SetBool("isClicked", true);
+            m_UnitAnim.SetBool("isClicked", false);
         }
     }
 }

@@ -52,7 +52,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeWorkerGold()
     {
-        if (m_Player.m_Upgrades.workerGold < 5)
+        if (m_Player.m_WorkerGold < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeWorkerGold();
         }
@@ -64,7 +64,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeWorkerSpeed()
     {
-        if (m_Player.m_Upgrades.workerSpeed < 5)
+        if (m_Player.m_WorkerSpeed < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeWorkerSpeed();
         }
@@ -76,7 +76,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeMeleeArmour()
     {
-        if (m_Player.m_Upgrades.meleeArmour < 5)
+        if (m_Player.m_MeleeArmour < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeMeleeArmour();
         }
@@ -88,7 +88,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeMeleeSpeed()
     {
-        if (m_Player.m_Upgrades.meleeSpeed < 5)
+        if (m_Player.m_MeleeSpeed < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeMeleeSpeed();
         }
@@ -100,7 +100,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeRangedArmour()
     {
-        if (m_Player.m_Upgrades.rangedArmour < 5)
+        if (m_Player.m_RangedArmour < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeRangedArmour();
         }
@@ -112,7 +112,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeRangedSpeed()
     {
-        if (m_Player.m_Upgrades.rangedSpeed < 5)
+        if (m_Player.m_RangedSpeed < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeRangedSpeed();
         }
@@ -124,7 +124,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeAirArmour()
     {
-        if (m_Player.m_Upgrades.airArmour < 5)
+        if (m_Player.m_AirArmour < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeAirArmour();
         }
@@ -136,7 +136,7 @@ public class GameHUD : MonoBehaviour {
 
     public void upgradeAirSpeed()
     {
-        if (m_Player.m_Upgrades.airSpeed < 5)
+        if (m_Player.m_AirSpeed < 5)
         {
             m_Player.GetComponent<Player>().CmdUpgradeAirSpeed();
         }
@@ -208,17 +208,17 @@ public class GameHUD : MonoBehaviour {
             }
             if (m_Player != null)
             {
-                transform.FindChild("UnitUpgrade/Worker/Gold/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.workerGold + "/5";
-                transform.FindChild("UnitUpgrade/Worker/Movement/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.workerSpeed + "/5";
+                transform.FindChild("UnitUpgrade/Worker/GoldUpgradeCount").GetComponent<Text>().text = m_Player.m_WorkerGold + "/5";
+                transform.FindChild("UnitUpgrade/Worker/MovementUpgradeCount").GetComponent<Text>().text = m_Player.m_WorkerSpeed + "/5";
 
-                transform.FindChild("UnitUpgrade/Melee/Armour/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.meleeArmour + "/5";
-                transform.FindChild("UnitUpgrade/Melee/Movement/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.meleeSpeed + "/5";
+                transform.FindChild("UnitUpgrade/Melee/ArmourUpgradeCount").GetComponent<Text>().text = m_Player.m_MeleeArmour + "/5";
+                transform.FindChild("UnitUpgrade/Melee/MovementUpgradeCount").GetComponent<Text>().text = m_Player.m_MeleeSpeed + "/5";
 
-                transform.FindChild("UnitUpgrade/Ranged/Armour/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.rangedArmour + "/5";
-                transform.FindChild("UnitUpgrade/Ranged/Movement/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.rangedSpeed + "/5";
+                transform.FindChild("UnitUpgrade/Ranged/ArmourUpgradeCount").GetComponent<Text>().text = m_Player.m_RangedArmour + "/5";
+                transform.FindChild("UnitUpgrade/Ranged/MovementUpgradeCount").GetComponent<Text>().text = m_Player.m_RangedSpeed + "/5";
 
-                transform.FindChild("UnitUpgrade/Air/Armour/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.airArmour + "/5";
-                transform.FindChild("UnitUpgrade/Air/Movement/UpgradeCount").GetComponent<Text>().text = m_Player.m_Upgrades.airSpeed + "/5";
+                transform.FindChild("UnitUpgrade/Air/ArmourUpgradeCount").GetComponent<Text>().text = m_Player.m_AirArmour + "/5";
+                transform.FindChild("UnitUpgrade/Air/MovementUpgradeCount").GetComponent<Text>().text = m_Player.m_AirSpeed + "/5";
             }
         }
         else
