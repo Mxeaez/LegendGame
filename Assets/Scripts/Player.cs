@@ -162,6 +162,13 @@ public class Player : NetworkBehaviour
     {
         GameObject worker = Instantiate(m_Worker, m_WorkerSpawn.transform.position, m_Worker.transform.rotation) as GameObject;
 
+        if (!m_Direction.m_FacingRight)
+        {
+            Vector3 originalScale = worker.transform.localScale;
+            originalScale.x *= -1;
+            worker.transform.localScale = originalScale;
+        }
+
         NetworkServer.SpawnWithClientAuthority(worker, this.gameObject);
 
         m_Gold -= Prices.m_WorkerPrice;
@@ -218,6 +225,9 @@ public class Player : NetworkBehaviour
                     ranged.transform.localScale = originalScale;
                 }
 
+                ranged.GetComponent<Stats>().m_ArmourUpgrade = m_RangedArmour;
+                ranged.GetComponent<Stats>().m_SpeedUpgrade = m_RangedSpeed;
+
                 NetworkServer.SpawnWithClientAuthority(ranged, this.gameObject);
 
                 m_Gold -= Prices.m_RangedPrice;
@@ -238,6 +248,7 @@ public class Player : NetworkBehaviour
     public void CmdUpgradeWorkerGold()
     {
         m_WorkerGold++;
+        m_Gold -= Prices.m_WorkerGold;
     }
 
     [Command]
@@ -245,44 +256,49 @@ public class Player : NetworkBehaviour
     {
 
         m_WorkerSpeed++;
-
+        m_Gold -= Prices.m_WorkerSpeed;
     }
 
     [Command]
     public void CmdUpgradeMeleeArmour()
     {
-
         m_MeleeArmour++;
+        m_Gold -= Prices.m_MeleeArmour;
     }
 
     [Command]
     public void CmdUpgradeMeleeSpeed()
     {
         m_MeleeSpeed++;
+        m_Gold -= Prices.m_MeleeSpeed;
     }
 
     [Command]
     public void CmdUpgradeRangedArmour()
     {
         m_RangedArmour++;
+        m_Gold -= Prices.m_RangedArmour;
     }
 
     [Command]
     public void CmdUpgradeRangedSpeed()
     {
         m_RangedSpeed++;
+        m_Gold -= Prices.m_RangedSpeed;
     }
 
     [Command]
     public void CmdUpgradeAirArmour()
     {
         m_AirArmour++;
+        m_Gold -= Prices.m_AirArmour;
     }
 
     [Command]
     public void CmdUpgradeAirSpeed()
     {
         m_AirSpeed++;
+        m_Gold -= Prices.m_AirSpeed;
     }
 
 

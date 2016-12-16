@@ -40,13 +40,19 @@ public class Ranged : Unit
     void Start()
     {
 
-        foreach(GameObject p in GameObject.FindGameObjectsWithTag("Player"))
+        if (GameObject.FindGameObjectsWithTag("Player") != null)
         {
-            if(p.GetComponent<Player>().isLocalPlayer)
+            foreach (GameObject p in GameObject.FindGameObjectsWithTag("Player"))
             {
-                m_Player = p.GetComponent<Player>();
-                Debug.Log("Player set for ranged");
-                break;
+                if (p.GetComponent<Player>() != null)
+                {
+                    if (p.GetComponent<Player>().isLocalPlayer)
+                    {
+                        m_Player = p.GetComponent<Player>();
+                        Debug.Log("Player set for ranged");
+                        break;
+                    }
+                }
             }
         }
         m_Anim = GetComponent<Animator>();
