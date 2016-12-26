@@ -239,6 +239,23 @@ public class Player : NetworkBehaviour
         }
     }
 
+    [Command]
+    public void CmdSpawnAir(Vector3 startPosition, Vector3 endPosition)
+    {
+
+        GameObject air = Instantiate(m_Air, m_UnitSpawn.transform.position, Quaternion.identity) as GameObject;
+
+        air.GetComponent<Air>().m_StartPosition = startPosition;
+        air.GetComponent<Air>().m_EndPosition = endPosition;
+
+        air.GetComponent<Stats>().m_ArmourUpgrade = m_AirArmour;
+        air.GetComponent<Stats>().m_SpeedUpgrade = m_AirSpeed;
+
+        NetworkServer.SpawnWithClientAuthority(air, this.gameObject);
+
+        m_Gold -= Prices.m_AirPrice;
+
+    }
 
     ////////
     ///Upgrades
